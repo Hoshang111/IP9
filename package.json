@@ -1,0 +1,29 @@
+{
+  "name": "ip9",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Hoshang111/IP9.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Hoshang111/IP9/issues"
+  },
+  "homepage": "https://github.com/Hoshang111/IP9#readme",
+  "devDependencies": {
+    "@types/node": "^18.0.3",
+    "typescript": "^4.7.4"
+  },
+  "dependencies": {
+    "axios": "^0.27.2",
+    "solc": "^0.8.15",
+    "web3": "^1.7.4"
+  }
+}
