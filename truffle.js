@@ -30,7 +30,7 @@ module.exports = {
       gas: 3000000,
     },
     rinkeby: {
-      provider: () => new HDWalletProvider(process.env.MNEMONIC, "https://rinkeby.infura.io/v3/" + process.env.INFURA_API_KEY),
+      provider: () => new HDWalletProvider(process.env.MNEMONIC, "https://rinkeby.infura.io/v3/ea2be64ae0f8443fb60153aaae60083f"),
       network_id: 4,
       gas: 3000000,
     },

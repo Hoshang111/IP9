@@ -127,7 +127,7 @@
   "sourceMap": "66:879:0:-;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;66:879:0;;;;;;;",
   "deployedSourceMap": "66:879:0:-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;237:301;;8:9:-1;5:2;;;30:1;27;20:12;5:2;237:301:0;;;;;;13:3:-1;8;5:12;2:2;;;30:1;27;20:12;2:2;237:301:0;;;;;;;;;;21:11:-1;8;5:28;2:2;;;46:1;43;36:12;2:2;237:301:0;;35:9:-1;28:4;12:14;8:25;5:40;2:2;;;58:1;55;48:12;2:2;237:301:0;;;;;;100:9:-1;95:1;81:12;77:20;67:8;63:35;60:50;39:11;25:12;22:29;11:107;8:2;;;131:1;128;121:12;8:2;237:301:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;30:3:-1;22:6;14;1:33;99:1;93:3;85:6;81:16;74:27;137:4;133:9;126:4;121:3;117:14;113:30;106:37;;169:3;161:6;157:16;147:26;;237:301:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;;92:29;;8:9:-1;5:2;;;30:1;27;20:12;5:2;92:29:0;;;:::i;:::-;;;;;;;;;;;;;;;;;;;;;;;127:28;;8:9:-1;5:2;;;30:1;27;20:12;5:2;127:28:0;;;:::i;:::-;;;;;;;;;;;;;;;;;;;;;;;574:369;;;:::i;:::-;;186:17;;8:9:-1;5:2;;;30:1;27;20:12;5:2;186:17:0;;;:::i;:::-;;;;;;;;;;;;;;;;;;;209:21;;8:9:-1;5:2;;;30:1;27;20:12;5:2;209:21:0;;;:::i;:::-;;;;;;;;;;;;;;;;;;;;;;;161:19;;8:9:-1;5:2;;;30:1;27;20:12;5:2;161:19:0;;;:::i;:::-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;23:1:-1;8:100;33:3;30:1;27:10;8:100;;;99:1;94:3;90:11;84:18;80:1;75:3;71:11;64:39;52:2;49:1;45:10;40:15;;8:100;;;12:14;161:19:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;237:301;451:6;443:5;:14;;;;;;;;;;;;:::i;:::-;;475:6;467:5;:14;;;;500:7;491:6;;:16;;;;;;;;;;;;;;;;;;525:6;517:5;;:14;;;;;;;;;;;;;;;;;;237:301;;;;:::o;92:29::-;;;;;;;;;;;;;:::o;127:28::-;;;;;;;;;;;;;:::o;574:369::-;751:5;;;;;;;;;;;737:19;;:10;:19;;;729:54;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;822:5;;797:21;:30;789:72;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;875:6;;;;;;;;;;;867:24;;:47;892:21;867:47;;;;;;;;;;;;;;;;;;;;;;;;8:9:-1;5:2;;;45:16;42:1;39;24:38;77:16;74:1;67:27;5:2;867:47:0;932:4;920:9;;:16;;;;;;;;;;;;;;;;;;574:369::o;186:17::-;;;;:::o;209:21::-;;;;;;;;;;;;;:::o;161:19::-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::o;66:879::-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;;;:::o;:::-;;;;;;;;;;;;;;;;;;;;;;;;;;;:::o",
   "source": "// SPDX-License-Identifier: MIT\npragma solidity >=0.4.22 <0.9.0;\n\ncontract BillOfSale {\n    address payable public seller;\n    address payable public buyer;\n    string public descr;\n    uint public price;\n    bool public confirmed;\n\n    function recordContract(string memory _descr, uint _price, address payable _seller, address payable _buyer) public { // takes in description for item, purchase price, buyer and seller ETH addresses\n        descr = _descr;\n        price = _price;\n        seller = _seller;\n        buyer = _buyer;\n    }\n\nfunction () external payable { }\n\nfunction confirmReceipt() public payable { // allows the buyer to confirm receipt of their item and release funds stored in the contract to the seller\n    require(msg.sender == buyer, \"only buyer can confirm\");\n    require(address(this).balance == price, \"purchase price must be funded\");\n    address(seller).transfer(address(this).balance);\n    confirmed = true;\n    }\n}",
-  "sourcePath": "/Users/hoshang/Documents/Uni/COMP6452/Rights/contracts/BillOfSale.sol",
+  "sourcePath": "/Users/hoshang/Documents/Uni/COMP6452/IP9/contracts/BillOfSale.sol",
   "ast": {
     "absolutePath": "project:/contracts/BillOfSale.sol",
     "exportedSymbols": {
@@ -682,7 +682,7 @@
                             "name": "msg",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 153,
+                            "referencedDeclaration": 152,
                             "src": "737:3:0",
                             "typeDescriptions": {
                               "typeIdentifier": "t_magic_message",
@@ -758,10 +758,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        156,
-                        157
+                        155,
+                        156
                       ],
-                      "referencedDeclaration": 157,
+                      "referencedDeclaration": 156,
                       "src": "729:7:0",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
@@ -812,7 +812,7 @@
                                 "name": "this",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
-                                "referencedDeclaration": 167,
+                                "referencedDeclaration": 166,
                                 "src": "805:4:0",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_contract$_BillOfSale_$80",
@@ -923,10 +923,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        156,
-                        157
+                        155,
+                        156
                       ],
-                      "referencedDeclaration": 157,
+                      "referencedDeclaration": 156,
                       "src": "789:7:0",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
@@ -966,7 +966,7 @@
                               "name": "this",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 167,
+                              "referencedDeclaration": 166,
                               "src": "900:4:0",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_contract$_BillOfSale_$80",
@@ -1854,10 +1854,10 @@
                                 }
                               ],
                               "overloadedDeclarations": [
-                                156,
-                                157
+                                155,
+                                156
                               ],
-                              "referencedDeclaration": 157,
+                              "referencedDeclaration": 156,
                               "type": "function (bool,string memory) pure",
                               "value": "require"
                             },
@@ -1898,7 +1898,7 @@
                                       "overloadedDeclarations": [
                                         null
                                       ],
-                                      "referencedDeclaration": 153,
+                                      "referencedDeclaration": 152,
                                       "type": "msg",
                                       "value": "msg"
                                     },
@@ -1987,10 +1987,10 @@
                                 }
                               ],
                               "overloadedDeclarations": [
-                                156,
-                                157
+                                155,
+                                156
                               ],
-                              "referencedDeclaration": 157,
+                              "referencedDeclaration": 156,
                               "type": "function (bool,string memory) pure",
                               "value": "require"
                             },
@@ -2065,7 +2065,7 @@
                                           "overloadedDeclarations": [
                                             null
                                           ],
-                                          "referencedDeclaration": 167,
+                                          "referencedDeclaration": 166,
                                           "type": "contract BillOfSale",
                                           "value": "this"
                                         },
@@ -2273,7 +2273,7 @@
                                       "overloadedDeclarations": [
                                         null
                                       ],
-                                      "referencedDeclaration": 167,
+                                      "referencedDeclaration": 166,
                                       "type": "contract BillOfSale",
                                       "value": "this"
                                     },
@@ -2385,10 +2385,17 @@
       "links": {},
       "address": "0x7727FEf0bA559085567A9065158320A76F1acA55",
       "transactionHash": "0xc3b33d492163621c034b03cd4bf363b46c29f241f2810d2a581030458981c1d0"
+    },
+    "5777": {
+      "events": {},
+      "links": {},
+      "address": "0xF1E8620915dc0c97894F18833447429AbB481C62",
+      "transactionHash": "0x6abdaedbf9c1ed1d8bb5c3cc2c6ae0617802b98062b1343febfe96794766e557"
     }
   },
   "schemaVersion": "3.4.8",
-  "updatedAt": "2022-07-20T14:19:33.846Z",
+  "updatedAt": "2022-07-24T08:34:02.675Z",
+  "networkType": "ethereum",
   "devdoc": {
     "methods": {}
   },
