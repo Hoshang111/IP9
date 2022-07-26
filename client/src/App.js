@@ -1,103 +1,120 @@
-import React, { Component } from "react";
-import BillOfSaleContract from "./contracts/BillOfSale.json";
-import getWeb3 from "./utils/getWeb3";
-import truffleContract from "truffle-contract";
+import React, { useEffect, useState }  from "react";
+import OwnershipAgreement from "./contracts/OwnershipAgreement.json";
+import Web3 from "web3";
 
 import "./App.css";
 
-class App extends Component {
-  state = { seller: null, buyer: null, descr: null, price: 0, web3: null, accounts: null, contract: null, statusMessage: null };
+const App = () => {
+  const [seller, setSeller] = useState("NA");
+  const [buyer, setbuyer] = useState("NA");
+  const [des, setDes] = useState("No Des");
+  const [price, setprice] = useState(0);
+  const [web3, setWeb3] = useState(null);
+  const [account, setAccount] = useState([]);
+  const [contractAddress, setcontractAddress] = useState("");
+  const [contract, setContract] = useState({});
+  const [status, setStatus] = useState("NO STATUS");
+  // state = { seller: null, buyer: null, descr: null, price: 0, web3: null, accounts: null, contract: null, statusMessage: null };
 
-  componentDidMount = async () => {
-    try {
-      // Get network provider and web3 instance.
-      const web3 = await getWeb3();
+  
+  useEffect( async () => {
+    if (window.ethereum) {
+      (window.ethereum).request({method: 'eth_requestAccounts'})
+      .then((val) => {
+        setAccount(val);
+        console.log("acc: " + val);
+      })
+      .catch((ee) => {
+        console.log("Error: "+ ee);
+      });
 
-      // Use web3 to get the user's accounts.
-      const accounts = await web3.eth.getAccounts();
-
-      // Get the contract instance.
-      const Contract = truffleContract(BillOfSaleContract);
-      Contract.setProvider(web3.currentProvider);
-      const instance = await Contract.deployed();
-
-      // Set web3, accounts, and contract to the state, and then proceed with an
-      // example of interacting with the contract's methods.
-      this.setState({ web3, accounts, contract: instance }, this.runExample);
-    } catch (error) {
-      // Catch any errors for any of the above operations.
-      alert(
-        `Failed to load web3, accounts, or contract. Check console for details.`
-      );
-      console.log(error);
+    } else {
+      alert("MetaMask Not Found");
     }
-  };
 
-  onFundClick = async () =>{
-    const { contract, accounts, web3, price } = this.state;
-    web3.eth.sendTransaction({
-      from: accounts[0],
-      to: contract.address, 
-      value: price
-    });
+    const web_3 = new Web3(window.ethereum);
+    const netw = await web_3.eth.net.getNetworkType();
+    console.log(netw);
+    setWeb3(web_3);
+    // console.log(JSON.stringify(OwnershipAgreement.abi));
+    const contr = await new web_3.eth.Contract(OwnershipAgreement.abi, "0x7Dfae75f7B3a96a5123A859b20ad9f742f6979a0");
+    setcontractAddress(contr.options.address);
+    console.log(contr);
+    // const justRun = async () => {
+    //   try {
+    //     const web_3 = await getWeb3();
+    //     console.log(web_3);
+    //     const Etheraccount = await web_3.eth.getAccounts();
+    //     console.log(Etheraccount);
+        // const OwnershipContract = await truffleContract(OwnershipAgreement);
+        // OwnershipContract.setProvider(web_3.currentProvider);
+        // console.log(OwnershipContract);
+        // const inst= await OwnershipContract.deployed();
+        // console.log(inst);
+    //     setWeb3(web_3);
+    //     setAccount(Etheraccount);
+    //     setcontract(inst);
+    //     console.log(contract);
+    //   } catch (error) {
+    //     console.log(error);
+    //   }
+    // };
+    // justRun();
+    // run();
+  }, []);
+
+  const confirmClick = async () =>{
+    contract.confirmReceipt({ from: account[0] });
   }
 
-  onConfirmClick = async () =>{
-    const { contract, accounts } = this.state;
-    contract.confirmReceipt({ from: accounts[0] });
-  }
-
-  runExample = async () =>{
-    const { contract, web3 } = this.state;
-
+  const run= async () =>{
     const balance = await web3.eth.getBalance(contract.address);
-    const seller = await contract.seller();
-    const buyer = await contract.buyer();
-    const descr = await contract.descr();
-    const priceBN = await contract.price();
-    const price = priceBN.toString();
-    const status = await contract.confirmed();
-    const statusMessage = this.setStatusMessage(
-      status, 
-      parseInt(balance),
-      price
-    );
-    this.setState({ balance, seller, buyer, descr, price, statusMessage })
-  }
-
-  setStatusMessage = (status, balance, price)=>{
-    return status
-    ? "Receipt confirmed!"
-    : balance === price
-    ? "Payment Made"
-    : "Awaiting Payment";
+    const price_1 = (await contract.price()).toString();
+    const status_1 = await contract.confirmed();
+    setprice(price_1);
+    console.log(price);
+    console.log("check");
+    setStatus(StatusOfThePayment(status_1,parseInt(balance),price_1));
+    const seller_1 = await contract.seller();
+    setSeller(seller_1);
+    const buyer_1 = await contract.buyer();
+    setbuyer(buyer_1);
+    const des_1 = await contract.descr();
+    setDes(des_1);
   };
 
-  render() {
-    if (!this.state.web3) {
-      return <div>Loading Web3, accounts, and contract...</div>;
+  const StatusOfThePayment = (status, balance, price) => {
+    if(status) {
+      return "Confirmed!";
+    } else{
+      if (balance === price) {
+        return "Paid!";
+      } else {
+        return "Waiting for Payment";
+      }
     }
-    return (
-      <div className="App">
-        <h1>Bill of Sale</h1>
-        <div>
-          Agreement Status: <strong>{this.state.statusMessage}</strong>
+  };
+
+  return (
+    <>
+      {!web3 ?
+        (<div>Waiting for WEB3</div>)
+        :
+        (<div className="App">
+          <div className="navbar">
+            Account: {account}
           </div>
-          <div>Contract Address: {this.state.contract.address}</div>
-          <div>Contract Balance: {this.state.contract.balance}</div>
-          <div>Seller: {this.state.seller}</div>
-          <div>Buyer: {this.state.buyer} </div>
-          <div>Description: {this.state.descr}</div>
-          <div>Price: {this.state.price /10 ** 18} ETH</div>
-          <div>
-            <button onClick={()=> this.onFundClick()}>Fund Contract</button>
-            </div>
-            <div>
-            <button onClick={()=> this.onConfirmClick()}>Confirm Receipt</button>
-            </div>
-      </div>
-    );
-  }
-}
+          <h1>Ownership Agreement</h1>
+            <h4>Contract Address: {contractAddress}</h4>
+            <h4>Entity: {}</h4>
+            <h4>Item: {}</h4>
+            <h4>Date: {} </h4>
+            <h4>Confirmed: {}</h4>
+        </div>)
+      }
+    </>
+    
+  );
+};
 
 export default App;
