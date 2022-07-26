@@ -14,8 +14,6 @@ const App = () => {
   const [contractAddress, setcontractAddress] = useState("");
   const [contract, setContract] = useState({});
   const [status, setStatus] = useState("NO STATUS");
-  // state = { seller: null, buyer: null, descr: null, price: 0, web3: null, accounts: null, contract: null, statusMessage: null };
-
   
   useEffect( async () => {
     if (window.ethereum) {
@@ -40,32 +38,7 @@ const App = () => {
     const contr = await new web_3.eth.Contract(OwnershipAgreement.abi, "0x7Dfae75f7B3a96a5123A859b20ad9f742f6979a0");
     setcontractAddress(contr.options.address);
     console.log(contr);
-    // const justRun = async () => {
-    //   try {
-    //     const web_3 = await getWeb3();
-    //     console.log(web_3);
-    //     const Etheraccount = await web_3.eth.getAccounts();
-    //     console.log(Etheraccount);
-        // const OwnershipContract = await truffleContract(OwnershipAgreement);
-        // OwnershipContract.setProvider(web_3.currentProvider);
-        // console.log(OwnershipContract);
-        // const inst= await OwnershipContract.deployed();
-        // console.log(inst);
-    //     setWeb3(web_3);
-    //     setAccount(Etheraccount);
-    //     setcontract(inst);
-    //     console.log(contract);
-    //   } catch (error) {
-    //     console.log(error);
-    //   }
-    // };
-    // justRun();
-    // run();
   }, []);
-
-  const confirmClick = async () =>{
-    contract.confirmReceipt({ from: account[0] });
-  }
 
   const run= async () =>{
     const balance = await web3.eth.getBalance(contract.address);
@@ -110,6 +83,7 @@ const App = () => {
             <h4>Item: {}</h4>
             <h4>Date: {} </h4>
             <h4>Confirmed: {}</h4>
+            <textarea placeholder="Add Song" cols="90" rows="20"></textarea>
         </div>)
       }
     </>
