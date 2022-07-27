@@ -1,0 +1,42 @@
+.main {
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+  }
+  
+  body {
+    margin: 0px;
+    color: white;
+    background-color: #121212;
+  }
+  
+  .navbar {
+    width: 100%;
+    top: 0;
+    position: sticky;
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    background-color: #282c34;
+    align-items: center;
+    justify-content: space-between;
+    color: white;
+    border-bottom: 0.5px solid grey;
+  }
+  
+  .create-song {
+    background-color: #282c34;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 56px;
+    width: 20%;
+    border-radius: 5%;
+    border: 1px solid grey;
+  }
+
+a {
+    margin: 10px;
+    color: white;
+}
