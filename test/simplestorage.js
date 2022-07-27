@@ -1,11 +1,16 @@
-const SimpleStorage = artifacts.require("./SimpleStorage.sol");
+let simpleStorageInstance;
+
+const SimpleStorage = artifacts.require("SimpleStorage");
 
 contract("SimpleStorage", accounts => {
-  it("...should store the value 89.", async () => {
-    const simpleStorageInstance = await SimpleStorage.deployed();
 
+  beforeEach(async () => {
+    simpleStorageInstance = await SimpleStorage.deployed({ gasPrice: 15000000 });
+  })
+
+  it("...should store the value 89.", async () => {
     // Set value of 89
-    await simpleStorageInstance.set(89, { from: accounts[0] });
+    const tx = await simpleStorageInstance.set(89, { from: accounts[0], gasPrice: 15000000 });
 
     // Get stored value
     const storedData = await simpleStorageInstance.get.call();

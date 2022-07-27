@@ -1,24 +1,32 @@
-# OpenLawDapp
-OpenLaw Dapp for Funding Bill of Sale Contract
+# NFT Marketplace Box
 
-<img src="https://imgur.com/D0WXETe.png" />
+- [Requirements](#requirements)
+- [Setup](#setup)
+    - [Installation](#installation)
+    - [Deployment](#deployment)
+- [Usage](#usage)
+    - [Commands](#commands)
+    - [Testing](#testing)
+- [Support](#support)
 
-<strong>Requirements</strong>: Nvm, node (8.9.1), Truffle (5.1), Ganache (if running local blockchain for testing), Metamask account and test ether, React ^16.0.0
+This box contains the completed code for a NFT marketplace tutorial that teaches you how to write and deploy a simple DApp onto Ethereum and Optimism. That tutorial lives [here](https://trufflesuite.com/guides).
 
-First, run 'npm install' inside the client/ directory. <br/>
-Second, create your .env file with MNEMONIC="Enter MetaMask Mnemonic here" and INFURA_API_KEY="Enter Infura Project ID here" 
-for environment variables. <br/> 
-Run Ganache now if you are running a local blockchain to test this. 
-Third, run 'truffle migrate --network rinkeby'.<br/>
-Fourth, grab the contract address of the BillOfSale deployed on Rinkeby. <br/>
-Fifth, sign and create the Bill of Sale in OpenLaw site as seller and buyer. <br/>
-Sixth, run 'npm run start' within the client/ directory. <br/>
+## Requirements
 
-Click "Fund Contract" and Metamask will pop up, then click "Confirm Receipt" and the balance of the contract will be transferred to the seller. <br/>
+The NFT Marketplace box has the following requirements:
 
-To get test ether for rinkeby, go to faucet.rinkeby.io if you don't have any on Rinkeby. <br/>
+- [Node.js](https://nodejs.org/) 12.x or later
+- An [Infura](https://infura.io/) account and Project ID
+- A [MetaMask](https://metamask.io/) account
 
+### Installation
 
+For now, this box just lives under the truffle-box Github org.
 
+### Deployment
 
+See the section on deploying in the guide!
 
+## Support
+
+Need help? Get in touch with the Truffle community by posting on [Github Discussions](https://github.com/trufflesuite)!
