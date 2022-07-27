@@ -1,5 +1,5 @@
-var OA = artifacts.require("./OwnershipAgreement.sol");
+var BillOfSale = artifacts.require("./BillOfSale.sol");
 
 module.exports = function(deployer) {
-  deployer.deploy(OA);
+  deployer.deploy(BillOfSale);
 };

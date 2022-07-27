@@ -31,6 +31,8 @@ const App = () => {
     } else {
       alert("MetaMask Not Found");
     }
+    
+
 
     const web_3 = new Web3(window.ethereum);
     const ac = await web_3.eth.getAccounts();
