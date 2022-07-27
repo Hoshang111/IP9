@@ -1,8 +1,8 @@
 var AudioContract = artifacts.require("AudioContract");
-var Marketplace = artifacts.require("Marketplace");
+var RightsManager = artifacts.require("RightsManager");
 
 module.exports = async function(deployer) {
-  await deployer.deploy(Marketplace);
-  const marketplace = await Marketplace.deployed();
-  await deployer.deploy(AudioContract, marketplace.address);
+  await deployer.deploy(RightsManager);
+  const rightsmanager = await RightsManager.deployed();
+  await deployer.deploy(RightsManager, rightsmanager.address);
 }
