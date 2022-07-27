@@ -3,11 +3,9 @@ pragma solidity ^0.8.13;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
 
 contract AudioContract is ERC721URIStorage {
-  using Counters for Counters.Counter;
-  Counters.Counter private _tokenIds;
+  uint256 numtokenIds;
   address newAudioContract;
 
   constructor(address _newAudioContract) ERC721("Audio Contract", "AC") {
@@ -15,8 +13,8 @@ contract AudioContract is ERC721URIStorage {
   }
 
   function mint(string memory _tokenURI) public {
-    _tokenIds.increment();
-    uint256 newTokenId = _tokenIds.current();
+    numtokenIds++;
+    uint256 newTokenId = numtokenIds;
     
     _safeMint(msg.sender, newTokenId);
 

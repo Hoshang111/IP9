@@ -1,11 +1,11 @@
-var BoredPetsNFT = artifacts.require("BoredPetsNFT");
-var Marketplace = artifacts.require("Marketplace");
+var AudioContract = artifacts.require("AudioContract");
+var RightsManager = artifacts.require("RightsManager");
 
-async function logNftLists(marketplace) {
-    let listedNfts = await marketplace.getListedNfts.call()
+async function logNftLists(rightsmanager) {
+    let rightsmanager = await rightsmanager.getListedNfts.call()
     const accountAddress = '0xEE1ee6529eb69Be0E5105686021410EB45E4302E'
-    let myNfts = await marketplace.getMyNfts.call({from: accountAddress})
-    let myListedNfts = await marketplace.getMyListedNfts.call({from: accountAddress})
+    let myNfts = await rightsmanager.getMyNfts.call({from: accountAddress})
+    let myListedNfts = await rightsmanager.getMyListedNfts.call({from: accountAddress})
     console.log(`listedNfts: ${listedNfts.length}`)
     console.log(`myNfts: ${myNfts.length}`)
     console.log(`myListedNfts ${myListedNfts.length}\n`)
@@ -13,8 +13,8 @@ async function logNftLists(marketplace) {
 
 const main = async (cb) => {
   try {
-    const boredPets = await BoredPetsNFT.deployed()
-    const marketplace = await Marketplace.deployed()
+    const audioContract = await AudioContract.deployed()
+    const RightsManager = await RightsManager.deployed()
 
     console.log('MINT AND LIST 3 NFTs')
     let listingFee = await marketplace.getListingFee()
