@@ -1,13 +1,32 @@
-# Sample Hardhat Project
+# NFT Marketplace Box
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, and a script that deploys that contract.
+- [Requirements](#requirements)
+- [Setup](#setup)
+    - [Installation](#installation)
+    - [Deployment](#deployment)
+- [Usage](#usage)
+    - [Commands](#commands)
+    - [Testing](#testing)
+- [Support](#support)
 
-Try running some of the following tasks:
+This box contains the completed code for a NFT marketplace tutorial that teaches you how to write and deploy a simple DApp onto Ethereum and Optimism. That tutorial lives [here](https://trufflesuite.com/guides).
 
-```shell
-npx hardhat help
-npx hardhat test
-GAS_REPORT=true npx hardhat test
-npx hardhat node
-npx hardhat run scripts/deploy.js
-```
+## Requirements
+
+The NFT Marketplace box has the following requirements:
+
+- [Node.js](https://nodejs.org/) 12.x or later
+- An [Infura](https://infura.io/) account and Project ID
+- A [MetaMask](https://metamask.io/) account
+
+### Installation
+
+For now, this box just lives under the truffle-box Github org.
+
+### Deployment
+
+See the section on deploying in the guide!
+
+## Support
+
+Need help? Get in touch with the Truffle community by posting on [Github Discussions](https://github.com/trufflesuite)!
