@@ -4,9 +4,9 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 
 import Marketplace from '../contracts/ethereum-contracts/Marketplace.json'
-import BoredPetsNFT from '../contracts/ethereum-contracts/BoredPetsNFT.json'
+import AudioContract from '../contracts/ethereum-contracts/AudioContract.json'
 // import Marketplace from '../contracts/ethereum-contracts/Marketplace.json'
-// import BoredPetsNFT from '../contracts/ethereum-contracts/BoredPetsNFT.json'
+// import AudioContract from '../contracts/ethereum-contracts/AudioContract.json'
 
 export default function Home() {
   const [nfts, setNfts] = useState([])
@@ -26,7 +26,7 @@ export default function Home() {
     // Iterate over the listed NFTs and retrieve their metadata
     const nfts = await Promise.all(listings.map(async (i) => {
       try {
-        const boredPetsContract = new web3.eth.Contract(BoredPetsNFT.abi, BoredPetsNFT.networks[networkId].address)
+        const boredPetsContract = new web3.eth.Contract(AudioContract.abi, AudioContract.networks[networkId].address)
         const tokenURI = await boredPetsContract.methods.tokenURI(i.tokenId).call()
         const meta = await axios.get(tokenURI)
         const nft = {
@@ -55,7 +55,7 @@ export default function Home() {
     const networkId = await web3.eth.net.getId();
     const marketPlaceContract = new web3.eth.Contract(Marketplace.abi, Marketplace.networks[networkId].address);
     const accounts = await web3.eth.getAccounts();
-    await marketPlaceContract.methods.buyNft(BoredPetsNFT.networks[networkId].address, nft.tokenId).send({ from: accounts[0], value: nft.price });
+    await marketPlaceContract.methods.buyNft(AudioContract.networks[networkId].address, nft.tokenId).send({ from: accounts[0], value: nft.price });
     loadNFTs()
   }
 

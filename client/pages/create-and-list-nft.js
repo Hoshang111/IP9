@@ -7,9 +7,7 @@ import { useRouter } from 'next/router'
 const client = ipfsHttpClient('https://ipfs.infura.io:5001/api/v0')
 
 import Marketplace from '../contracts/ethereum-contracts/Marketplace.json'
-import BoredPetsNFT from '../contracts/ethereum-contracts/BoredPetsNFT.json'
-// import Marketplace from '../contracts/ethereum-contracts/Marketplace.json'
-// import BoredPetsNFT from '../contracts/ethereum-contracts/BoredPetsNFT.json'
+import AudioContract from '../contracts/ethereum-contracts/AudioContract.json'
 
 export default function CreateItem() {
   const [fileUrl, setFileUrl] = useState(null)
@@ -61,8 +59,8 @@ export default function CreateItem() {
     const networkId = await web3.eth.net.getId()
     
     // Mint the NFT
-    const boredPetsContractAddress = BoredPetsNFT.networks[networkId].address
-    const boredPetsContract = new web3.eth.Contract(BoredPetsNFT.abi, boredPetsContractAddress)
+    const boredPetsContractAddress = AudioContract.networks[networkId].address
+    const boredPetsContract = new web3.eth.Contract(AudioContract.abi, boredPetsContractAddress)
     const accounts = await web3.eth.getAccounts()
     const marketPlaceContract = new web3.eth.Contract(Marketplace.abi, Marketplace.networks[networkId].address)
     let listingFee = await marketPlaceContract.methods.getListingFee().call()

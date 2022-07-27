@@ -4,9 +4,7 @@ import axios from 'axios';
 import Web3Modal from 'web3modal';
 
 import Marketplace from '../contracts/ethereum-contracts/Marketplace.json'
-import BoredPetsNFT from '../contracts/ethereum-contracts/BoredPetsNFT.json'
-// import Marketplace from '../contracts/ethereum-contracts/Marketplace.json'
-// import BoredPetsNFT from '../contracts/ethereum-contracts/BoredPetsNFT.json'
+import AudioContract from '../contracts/ethereum-contracts/AudioContract.json'
 
 export default function CreatorDashboard() {
   const [nfts, setNfts] = useState([])
@@ -27,7 +25,7 @@ export default function CreatorDashboard() {
     // Iterate over my listed NFTs and retrieve their metadata
     const nfts = await Promise.all(listings.map(async i => {
       try {
-        const boredPetsContract = new web3.eth.Contract(BoredPetsNFT.abi, BoredPetsNFT.networks[networkId].address)
+        const boredPetsContract = new web3.eth.Contract(AudioContract.abi, AudioContract.networks[networkId].address)
         const tokenURI = await boredPetsContract.methods.tokenURI(i.tokenId).call();
         const meta = await axios.get(tokenURI);
         let item = {

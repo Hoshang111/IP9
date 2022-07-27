@@ -5,9 +5,7 @@ import Web3Modal from 'web3modal'
 import { useRouter } from 'next/router'
 
 import Marketplace from '../contracts/ethereum-contracts/Marketplace.json'
-import BoredPetsNFT from '../contracts/ethereum-contracts/BoredPetsNFT.json'
-// import Marketplace from '../contracts/ethereum-contracts/Marketplace.json'
-// import BoredPetsNFT from '../contracts/ethereum-contracts/BoredPetsNFT.json'
+import AudioContract from '../contracts/ethereum-contracts/AudioContract.json'
 
 export default function MyAssets() {
   const [nfts, setNfts] = useState([])
@@ -22,8 +20,8 @@ export default function MyAssets() {
     const web3 = new Web3(provider)
     const networkId = await web3.eth.net.getId()
     const marketPlaceContract = new web3.eth.Contract(Marketplace.abi, Marketplace.networks[networkId].address)
-    const boredPetsContractAddress = BoredPetsNFT.networks[networkId].address
-    const boredPetsContract = new web3.eth.Contract(BoredPetsNFT.abi, boredPetsContractAddress)
+    const boredPetsContractAddress = AudioContract.networks[networkId].address
+    const boredPetsContract = new web3.eth.Contract(AudioContract.abi, boredPetsContractAddress)
     const accounts = await web3.eth.getAccounts()
     const data = await marketPlaceContract.methods.getMyNfts().call({from: accounts[0]})
 

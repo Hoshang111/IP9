@@ -5,14 +5,15 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
-contract Marketplace is ReentrancyGuard {
+contract RightsManagement is ReentrancyGuard {
   using Counters for Counters.Counter;
   Counters.Counter private _nftsSold;
   Counters.Counter private _nftCount;
   uint256 public LISTING_FEE = 0.0001 ether;
   address payable private _marketOwner;
-  mapping(uint256 => NFT) private _idToNFT;
-  struct NFT {
+  mapping(uint256 => AudioRight) private _idToNFT;
+
+  struct AudioRight {
     address nftContract;
     uint256 tokenId;
     address payable seller;
@@ -66,7 +67,7 @@ contract Marketplace is ReentrancyGuard {
 
     IERC721(_nftContract).transferFrom(msg.sender, address(this), _tokenId);
 
-    NFT storage nft = _idToNFT[_tokenId];
+    AudioRight storage nft = _idToNFT[_tokenId];
     nft.seller = payable(msg.sender);
     nft.owner = payable(address(this));
     nft.listed = true;
