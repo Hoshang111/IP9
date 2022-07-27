@@ -7,41 +7,54 @@ const Reason = require("./reason");
 const handlers = require("./handlers");
 const override = require("./override");
 const reformat = require("./reformat");
-const { formatters } = require("web3-core-helpers"); //used for reproducing web3's behavior
+const { sendTransactionManual } = require("./manual-send");
 
 const execute = {
   // -----------------------------------  Helpers --------------------------------------------------
   /**
    * Retrieves gas estimate multiplied by the set gas multiplier for a `sendTransaction` call.
+   * Lacking an estimate, sets gas to have of latest blockLimit
    * @param  {Object} params     `sendTransaction` parameters
    * @param  {Number} blockLimit  most recent network block.blockLimit
    * @return {Number}             gas estimate
    */
-  getGasEstimate: function (params, blockLimit) {
+  getGasEstimate: function (params, blockLimit, stacktrace = false) {
     const constructor = this;
     const interfaceAdapter = this.interfaceAdapter;
 
     return new Promise(function (accept) {
-      // Always prefer specified gas - this includes gas set by class_defaults
+      // Always prefer gas specified by user (if a user sets gas to 0, that is treated
+      // as undefined here and we do proceed to do gas estimation)
       if (params.gas) return accept(params.gas);
       if (!constructor.autoGas) return accept();
 
       interfaceAdapter
-        .estimateGas(params)
+        .estimateGas(params, stacktrace)
         .then(gas => {
-          const bestEstimate = utils.multiplyBigNumberByDecimal(
-            utils.bigNumberify(gas),
-            constructor.gasMultiplier
-          );
-
-          // Don't go over blockLimit
-          const limit = utils.bigNumberify(blockLimit);
-          bestEstimate.gte(limit)
-            ? accept(limit.sub(1).toHexString())
-            : accept(bestEstimate.toHexString());
-
-          // We need to let txs that revert through.
-          // Often that's exactly what you are testing.
+          // there are situations where the web3 gas estimation function in interfaceAdapter
+          // fails, specifically when a transaction will revert; we still want to continue
+          // the user flow for debugging purposes if the user has enabled stacktraces; so we provide a
+          // default gas for that situation, equal to half of the blockLimit for the latest block
+          //
+          // note: this means if a transaction will revert but the user does not have stacktracing enabled,
+          // they will get an error from the gas estimation and be unable to proceed; we may need to revisit this
+          if (gas === null) {
+            const defaultGas = utils.bigNumberify(Math.floor(blockLimit / 2));
+            accept(defaultGas.toHexString());
+          } else {
+            const limit = utils.bigNumberify(blockLimit);
+            // if we did get a numerical gas estimate from interfaceAdapter, we
+            // multiply that estimate by the gasMultiplier to help ensure we
+            // have enough gas for the transaction
+            const bestEstimate = utils.multiplyBigNumberByDecimal(
+              utils.bigNumberify(gas),
+              constructor.gasMultiplier
+            );
+            // Check that we don't go over blockLimit
+            bestEstimate.gte(limit)
+              ? accept(limit.sub(1).toHexString())
+              : accept(bestEstimate.toHexString());
+          }
         })
         .catch(() => accept());
     });
@@ -53,18 +66,21 @@ const execute = {
    * @param  {Object} constructor   TruffleContract constructor
    * @param  {Object} methodABI     Function ABI segment w/ inputs & outputs keys.
    * @param  {Array}  _arguments    Arguments passed to method invocation
+   * @param  {Boolean}  isCall      Used when preparing a call as opposed to a tx;
+   *                                  skips network checks and ignores default gas prices
    * @return {Promise}              Resolves object w/ tx params disambiguated from arguments
    */
-  prepareCall: async function (constructor, methodABI, _arguments) {
+  prepareCall: async function (constructor, methodABI, _arguments, isCall) {
     let args = Array.prototype.slice.call(_arguments);
-    let params = utils.getTxParams.call(constructor, methodABI, args);
+    let params = utils.getTxParams.call(constructor, methodABI, args, isCall);
 
     args = utils.convertToEthersBN(args);
 
     if (constructor.ens && constructor.ens.enabled) {
       const { web3 } = constructor;
       const processedValues = await utils.ens.convertENSNames({
-        ensSettings: constructor.ens,
+        networkId: constructor.network_id,
+        ens: constructor.ens,
         inputArgs: args,
         inputParams: params,
         methodABI,
@@ -73,7 +89,10 @@ const execute = {
       args = processedValues.args;
       params = processedValues.params;
     }
-
+    //isCall flag used to skip network call for read data (calls type) methods invocation
+    if (isCall) {
+      return { args, params };
+    }
     const network = await constructor.detectNetwork();
     return { args, params, network };
   },
@@ -124,9 +143,10 @@ const execute = {
       if (execute.hasDefaultBlock(args, lastArg, methodABI.inputs)) {
         defaultBlock = args.pop();
       }
-
+      //skipNetworkCheck flag passed to skip network call for read data (calls type) methods invocation
+      const skipNetworkCheck = true;
       execute
-        .prepareCall(constructor, methodABI, args)
+        .prepareCall(constructor, methodABI, args, skipNetworkCheck)
         .then(async ({ args, params }) => {
           let result;
 
@@ -188,11 +208,13 @@ const execute = {
             contract: constructor
           });
 
+          const stacktrace = promiEvent.debug ? promiEvent.debug : false;
           try {
             params.gas = await execute.getGasEstimate.call(
               constructor,
               params,
-              network.blockLimit
+              network.blockLimit,
+              stacktrace
             );
           } catch (error) {
             promiEvent.reject(error);
@@ -203,7 +225,9 @@ const execute = {
             .sendTransaction(web3, params, promiEvent, context) //the crazy things we do for stacktracing...
             .then(receipt => {
               if (promiEvent.debug) {
-                promiEvent.resolve(receipt);
+                // in this case, we need to manually invoke the handler since it
+                // hasn't been set up (hack?)
+                handlers.receipt(context, receipt);
               }
               //otherwise, just let the handlers handle things
             })
@@ -249,11 +273,13 @@ const execute = {
 
           const contract = new web3.eth.Contract(constructor.abi);
           params.data = contract.deploy(options).encodeABI();
+          const stacktrace = promiEvent.debug ? promiEvent.debug : false;
 
           params.gas = await execute.getGasEstimate.call(
             constructor,
             params,
-            blockLimit
+            blockLimit,
+            stacktrace
           );
 
           context.params = params;
@@ -522,8 +548,8 @@ const execute = {
   //input works the same as input to web3.sendTransaction
   //(well, OK, it's lacking some things there too, but again, good enough
   //for our purposes)
-  sendTransaction: function (web3, params, promiEvent, context) {
-    //first off: if we don't need the debugger, let's not risk any errors on our part,
+  sendTransaction: async function (web3, params, promiEvent, context) {
+    //if we don't need the debugger, let's not risk any errors on our part,
     //and just have web3 do everything
     if (!promiEvent || !promiEvent.debug) {
       const deferred = web3.eth.sendTransaction(params);
@@ -532,88 +558,7 @@ const execute = {
     }
     //otherwise, do things manually!
     //(and skip the PromiEvent stuff :-/ )
-    return execute.sendTransactionManual(web3, params, promiEvent);
-  },
-
-  sendTransactionManual: async function (web3, params, promiEvent) {
-    //note: to head off any potential problems with Webpack (contract *has* to
-    //work on web!), I'm going to resort to manual promise creation rather than
-    //using util.promisify :-/
-    debug("executing manually!");
-    const send = rpc =>
-      new Promise((accept, reject) =>
-        web3.currentProvider.send(rpc, (err, result) =>
-          err ? reject(err) : accept(result)
-        )
-      );
-    //let's clone params
-    let transaction = {};
-    for (let key in params) {
-      transaction[key] = params[key];
-    }
-    transaction.from =
-      transaction.from != undefined
-        ? transaction.from
-        : web3.eth.defaultAccount;
-    //now: if the from address is in the wallet, web3 will sign the transaction before
-    //sending, so we have to account for that
-    const account = web3.eth.accounts.wallet[transaction.from];
-    let rpcPromise;
-    if (account) {
-      const rawTx = (
-        await web3.eth.accounts.sign(transaction, account.privateKey)
-      ).rawTransaction;
-      rpcPromise = send({
-        jsonrpc: "2.0",
-        id: Date.now(),
-        method: "eth_sendRawTransaction",
-        params: [rawTx]
-      });
-    } else {
-      //in this case, web3 hasn't checked the validity of our inputs, so we'd better
-      //have it do that before the send
-      transaction = formatters.inputTransactionFormatter(transaction); //warning, not a pure fn
-      rpcPromise = send({
-        jsonrpc: "2.0",
-        id: Date.now(),
-        method: "eth_sendTransaction",
-        params: [transaction]
-      });
-    }
-    const rpcReturn = await rpcPromise;
-    const txHash = rpcReturn.result; //note: this should work even in Ganache default mode!
-    debug("txHash: %s", txHash);
-    //this is unlike for calls, where default mode poses more of a problem
-    promiEvent.setTransactionHash(txHash); //this here is why I wrote this function @_@
-    const receipt = await web3.eth.getTransactionReceipt(txHash);
-    if (rpcReturn.error) {
-      //appears to be how web3 handles errors in Ganache's default mode??
-      throw new Error("Returned error: " + rpcReturn.error.message);
-    }
-    if (receipt.status) {
-      if (!transaction.to) {
-        //in the deployment case, web3 might error even when technically successful @_@
-        if ((await web3.eth.getCode(receipt.contractAddress)) === "0x") {
-          throw new Error(
-            "The contract code couldn't be stored, please check your gas limit."
-          );
-        }
-      }
-      return receipt;
-    } else {
-      //otherwise: we have to mimic web3's errors @_@
-      if (!transaction.to) {
-        //deployment case
-        throw new Error(
-          "The contract code couldn't be stored, please check your gas limit."
-        );
-      }
-      throw new Error(
-        "Transaction has been reverted by the EVM:" +
-          "\n" +
-          JSON.stringify(receipt)
-      );
-    }
+    return sendTransactionManual(web3, params, promiEvent);
   }
 };
 

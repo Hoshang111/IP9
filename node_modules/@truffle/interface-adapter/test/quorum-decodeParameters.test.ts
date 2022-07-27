@@ -1,59 +1,52 @@
 import { describe, it } from "mocha";
-import assert from "assert";
+import { assert } from "chai";
 
-import { Server } from "http";
-
-import Web3 from "web3";
-import Ganache from "ganache-core";
+import Ganache, { EthereumProvider } from "ganache";
 
 import { Web3Shim } from "../lib";
 
-const port = 12345;
-
-async function prepareGanache(
-  quorumEnabled: boolean
-): Promise<{ server: Server; web3Shim: Web3Shim }> {
-  return new Promise((resolve, reject) => {
-    const server = Ganache.server();
-    server.listen(port, () => {
-      const web3Shim = new Web3Shim({
-        provider: new Web3.providers.HttpProvider(`http://127.0.0.1:${port}`),
-        networkType: quorumEnabled ? "quorum" : "ethereum"
-      });
-      resolve({
-        server,
-        web3Shim
-      });
-    });
+function prepareGanache(quorumEnabled: boolean): {
+  provider: EthereumProvider;
+  web3Shim: Web3Shim;
+} {
+  const provider = Ganache.provider({
+    miner: {
+      instamine: "strict"
+    },
+    logging: {
+      quiet: true
+    }
   });
+  const web3Shim = new Web3Shim({
+    provider,
+    networkType: quorumEnabled ? "quorum" : "ethereum"
+  });
+  return {
+    provider,
+    web3Shim
+  };
 }
 
 const expectedOutput = [{ name: "retVal", type: "uint256" }];
 const emptyByte = "";
 
-describe("Quorum decodeParameters Overload", function() {
-  it("decodes an empty byte to a '0' string value w/ quorum=true", async function() {
-    return new Promise(async (resolve, reject) => {
-      let preparedGanache;
-      try {
-        preparedGanache = await prepareGanache(true);
-        const result = await preparedGanache.web3Shim.eth.abi.decodeParameters(
-          expectedOutput,
-          emptyByte
-        );
-        assert(result);
-        assert(result.retVal === "0");
-        preparedGanache.server.close(resolve);
-      } catch (e) {
-        preparedGanache.server.close(() => {
-          reject(e);
-        });
-      }
-    });
+describe("Quorum decodeParameters Overload", function () {
+  it("decodes an empty byte to a '0' string value w/ quorum=true", async function () {
+    const preparedGanache = await prepareGanache(true);
+    try {
+      const result = preparedGanache.web3Shim.eth.abi.decodeParameters(
+        expectedOutput,
+        emptyByte
+      );
+      assert(result);
+      assert(result.retVal === "0");
+    } finally {
+      await preparedGanache.provider.disconnect();
+    }
   });
 
-  // ganache-core uses web3@1.0.0-beta.35 which doesn't include the 'Out of Gas?' decoder guard!
-  it.skip("throws an 'Out of Gas?' error when decoding an empty byte w/ quorum=false", async function() {
+  // ganache uses web3@1.0.0-beta.35 which doesn't include the 'Out of Gas?' decoder guard!
+  it.skip("throws an 'Out of Gas?' error when decoding an empty byte w/ quorum=false", async function () {
     return new Promise(async (resolve, reject) => {
       let preparedGanache: any;
       try {
@@ -64,11 +57,9 @@ describe("Quorum decodeParameters Overload", function() {
             emptyByte
           );
         });
-        preparedGanache.server.close(resolve);
+        preparedGanache.provider.disconnect().then(() => resolve());
       } catch (e) {
-        preparedGanache.server.close(() => {
-          reject(e);
-        });
+        preparedGanache.provider.disconnect().then(() => reject(2));
       }
     });
   });

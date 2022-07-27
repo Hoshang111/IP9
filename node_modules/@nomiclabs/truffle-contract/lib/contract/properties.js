@@ -57,7 +57,7 @@ module.exports = {
       return this._json.numberFormat;
     },
     set: function (val) {
-      const allowedFormats = ["BigNumber", "BN", "String"];
+      const allowedFormats = ["BigNumber", "BN", "String", "BigInt"];
 
       const msg =
         `Invalid number format setting: "${val}": ` +
@@ -399,6 +399,14 @@ module.exports = {
     },
     set: function (sources) {
       this._json.deployedGeneratedSources = sources;
+    }
+  },
+  db: {
+    get: function () {
+      return this._json.db;
+    },
+    set: function (db) {
+      this._json.db = db;
     }
   }
 };

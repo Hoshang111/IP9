@@ -25,7 +25,6 @@ var contract = require("@truffle/contract");
 
 var MyContract = contract({
   abi: ...,
-  unlinked_binary: ...,
   address: ..., // optional
   // many more
 })
@@ -82,7 +81,7 @@ Let's use `@truffle/contract` with an example contract from [Dapps For Beginners
 
 ```javascript
 // Require the package that was previosly saved by @truffle/artifactor
-var MetaCoin = require("./path/to/MetaCoin.sol");
+var MetaCoin = require("./path/to/MetaCoin.json");
 
 // Remember to set the Web3 provider (see above).
 MetaCoin.setProvider(provider);
@@ -138,7 +137,7 @@ Each contract abstraction -- `MyContract` in the examples above -- have the foll
 
 #### `MyContract.new([arg1, arg2, ...], [tx params])`
 
-This function take whatever contructor parameters your contract requires and deploys a new instance of the contract to the network. There's an optional last argument which you can use to pass transaction parameters including the transaction from address, gas limit and gas price. This function returns a Promise that resolves into a new instance of the contract abstraction at the newly deployed address.
+This function take whatever constructor parameters your contract requires and deploys a new instance of the contract to the network. There's an optional last argument which you can use to pass transaction parameters including the transaction from address, gas limit and gas price. This function returns a Promise that resolves into a new instance of the contract abstraction at the newly deployed address.
 
 #### `MyContract.at(address)`
 
@@ -210,7 +209,7 @@ var MyOtherContract = MyContract.clone(1337);
 #### `MyContract.numberFormat = number_type`
 You can set this property to choose the number format that abstraction methods return.  The default behavior is to return BN.
 ```javascript
-// Choices are:  `["BigNumber", "BN", "String"].
+// Choices are:  `["BigNumber", "BN", "String", "BigInt"].
 var Example = artifacts.require('Example');
 Example.numberFormat = 'BigNumber';
 ```
@@ -319,7 +318,7 @@ instance.getValue().then(function(val) {
 
 #### Processing transaction results
 
-When you make a transaction, you're given a `result` object that gives you a wealth of information about the transaction. You're given the transaction has (`result.tx`), the decoded events (also known as logs; `result.logs`), and a transaction receipt (`result.receipt`). In the below example, you'll recieve the `ValueSet()` event because you triggered the event using the `setValue()` function:
+When you make a transaction, you're given a `result` object that gives you a wealth of information about the transaction. You're given the transaction hash (`result.tx`), the decoded events (also known as logs; `result.logs`), and a transaction receipt (`result.receipt`). In the below example, you'll recieve the `ValueSet()` event because you triggered the event using the `setValue()` function:
 
 ```javascript
 instance.setValue(5).then(function(result) {

@@ -6,6 +6,22 @@ const BlockchainUtils = require("@truffle/blockchain-utils");
 const reformat = require("../reformat");
 const ens = require("./ens");
 
+const allowedTxParams = new Set([
+  "from",
+  "to",
+  "gas",
+  "gasPrice",
+  "maxFeePerGas",
+  "maxPriorityFeePerGas",
+  "value",
+  "data",
+  "nonce",
+  "accessList",
+  "type",
+  "privateFor",
+  "overwrite"
+]);
+
 const Utils = {
   is_object(val) {
     return typeof val === "object" && !Array.isArray(val);
@@ -21,26 +37,10 @@ const Utils = {
     return web3Utils.isBN(val) || web3Utils.isBigNumber(val);
   },
 
-  is_tx_params(val) {
+  isTxParams(val) {
     if (!Utils.is_object(val)) return false;
     if (Utils.is_big_number(val)) return false;
-
-    const allowed_fields = {
-      from: true,
-      to: true,
-      gas: true,
-      gasPrice: true,
-      value: true,
-      data: true,
-      nonce: true,
-      privateFor: true
-    };
-
-    for (let field_name of Object.keys(val)) {
-      if (allowed_fields[field_name]) return true;
-    }
-
-    return false;
+    return Object.keys(val).some(fieldName => allowedTxParams.has(fieldName));
   },
 
   decodeLogs(_logs, isSingle) {
@@ -133,22 +133,31 @@ const Utils = {
   },
 
   // Extracts optional tx params from a list of fn arguments
-  getTxParams(methodABI, args) {
+  getTxParams(methodABI, args, ignoreDefaultGasPriceParams = false) {
     const constructor = this;
 
-    const expected_arg_count = methodABI ? methodABI.inputs.length : 0;
+    const expectedArgCount = methodABI ? methodABI.inputs.length : 0;
 
-    let tx_params = {};
-    const last_arg = args[args.length - 1];
+    let txParams = {};
+    const lastArg = args[args.length - 1];
 
-    if (
-      args.length === expected_arg_count + 1 &&
-      Utils.is_tx_params(last_arg)
-    ) {
-      tx_params = args.pop();
+    if (args.length === expectedArgCount + 1 && Utils.isTxParams(lastArg)) {
+      txParams = args.pop();
     }
 
-    return Utils.merge(constructor.class_defaults, tx_params);
+    let defaultParams = constructor.class_defaults;
+    if (ignoreDefaultGasPriceParams) {
+      //this parameter is set when making calls (as opposed to transactions)
+      //gas price params can cause problems with those on some networks, so
+      //we ignore any defaults, and only include them if they were explicitly
+      //specified
+      defaultParams = { ...constructor.class_defaults }; //clone
+      delete defaultParams.gasPrice;
+      delete defaultParams.maxFeePerGas;
+      delete defaultParams.maxPriorityFeePerGas;
+    }
+
+    return Utils.merge(defaultParams, txParams);
   },
 
   // Verifies that a contracts libraries have been linked correctly.
@@ -156,13 +165,15 @@ const Utils = {
   checkLibraries() {
     const constructor = this;
     const regex = /__[^_]+_+/g;
-    let unlinked_libraries = constructor.binary.match(regex);
+    let unlinkedLibraries = constructor.binary.match(regex);
 
-    if (unlinked_libraries !== null) {
-      unlinked_libraries = unlinked_libraries
-        .map((
-          name // Remove underscores
-        ) => name.replace(/_/g, ""))
+    if (unlinkedLibraries !== null) {
+      unlinkedLibraries = unlinkedLibraries
+        .map(
+          (
+            name // Remove underscores
+          ) => name.replace(/_/g, "")
+        )
         .sort()
         .filter((name, index, arr) => {
           // Remove duplicates
@@ -174,11 +185,7 @@ const Utils = {
         })
         .join(", ");
 
-      const error = `${
-        constructor.contractName
-      } contains unresolved libraries. You must deploy and link the following libraries before you can deploy a new version of ${
-        constructor.contractName
-      }: ${unlinked_libraries}`;
+      const error = `${constructor.contractName} contains unresolved libraries. You must deploy and link the following libraries before you can deploy a new version of ${constructor.contractName}: ${unlinkedLibraries}`;
 
       throw new Error(error);
     }
