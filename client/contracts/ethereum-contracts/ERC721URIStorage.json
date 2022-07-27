@@ -352,7 +352,11 @@
         1511
       ],
       "ERC165": [
+<<<<<<< HEAD
         1738
+=======
+        1812
+>>>>>>> 85801c3088b10bbb32283bc91a31806b2924cf63
       ],
       "ERC721": [
         905
@@ -361,7 +365,11 @@
         1167
       ],
       "IERC165": [
+<<<<<<< HEAD
         1750
+=======
+        1824
+>>>>>>> 85801c3088b10bbb32283bc91a31806b2924cf63
       ],
       "IERC721": [
         1021
@@ -373,7 +381,11 @@
         1039
       ],
       "Strings": [
+<<<<<<< HEAD
         1714
+=======
+        1788
+>>>>>>> 85801c3088b10bbb32283bc91a31806b2924cf63
       ]
     },
     "id": 1168,
@@ -435,8 +447,13 @@
           905,
           1194,
           1021,
+<<<<<<< HEAD
           1738,
           1750,
+=======
+          1812,
+          1824,
+>>>>>>> 85801c3088b10bbb32283bc91a31806b2924cf63
           1511
         ],
         "name": "ERC721URIStorage",
@@ -450,7 +467,11 @@
               "id": 1046,
               "name": "Strings",
               "nodeType": "IdentifierPath",
+<<<<<<< HEAD
               "referencedDeclaration": 1714,
+=======
+              "referencedDeclaration": 1788,
+>>>>>>> 85801c3088b10bbb32283bc91a31806b2924cf63
               "src": "290:7:4"
             },
             "nodeType": "UsingForDirective",
@@ -1947,7 +1968,11 @@
   },
   "networks": {},
   "schemaVersion": "3.4.8",
+<<<<<<< HEAD
   "updatedAt": "2022-07-27T17:10:57.752Z",
+=======
+  "updatedAt": "2022-07-27T16:25:11.165Z",
+>>>>>>> 85801c3088b10bbb32283bc91a31806b2924cf63
   "devdoc": {
     "details": "ERC721 token with storage based token URI management.",
     "kind": "dev",
