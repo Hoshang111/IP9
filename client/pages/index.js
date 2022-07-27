@@ -14,9 +14,9 @@ import { create } from 'ipfs-http-client'
 export default function Home() {
   // const [nfts, setNfts] = useState([])
   // const [loadingState, setLoadingState] = useState('not-loaded')
-  
+
   // useEffect(() => { loadNFTs() }, [])
-  
+
   // async function loadNFTs() {
   //   const web3Modal = new Web3Modal()
   //   const provider = await web3Modal.connect()
@@ -65,36 +65,40 @@ export default function Home() {
   // if (loadingState === 'loaded' && !nfts.length) {
   //   return (<h1 className="px-20 py-10 text-3xl">No pets available!</h1>)
   // } else {
-    // return (
-    //   <div className="flex justify-center">
-    //     <div className="px-4" style={{ maxWidth: '1600px' }}>
-    //       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4">
-    //         {
-    //           nfts.map((nft, i) => (
-    //             <div key={i} className="border shadow rounded-xl overflow-hidden">
-    //               <img src={nft.image} />
-    //               <div className="p-4">
-    //                 <p style={{ height: '64px' }} className="text-2xl font-semibold">{nft.name}</p>
-    //                 <div style={{ height: '70px', overflow: 'hidden' }}>
-    //                   <p className="text-gray-400">{nft.description}</p>
-    //                 </div>
-    //               </div>
-    //               <div className="p-4 bg-black">
-    //                 <p className="text-2xl font-bold text-white">{Web3.utils.fromWei(nft.price, "ether")} ETH</p>
-    //                 <button className="mt-4 w-full bg-teal-400 text-white font-bold py-2 px-12 rounded" onClick={() => buyNft(nft)}>Buy</button>
-    //               </div>
-    //             </div>
-    //           ))
-    //         }
-    //       </div>
-    //     </div>
-    //   </div>
-    // )
+  // return (
+  //   <div className="flex justify-center">
+  //     <div className="px-4" style={{ maxWidth: '1600px' }}>
+  //       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4">
+  //         {
+  //           nfts.map((nft, i) => (
+  //             <div key={i} className="border shadow rounded-xl overflow-hidden">
+  //               <img src={nft.image} />
+  //               <div className="p-4">
+  //                 <p style={{ height: '64px' }} className="text-2xl font-semibold">{nft.name}</p>
+  //                 <div style={{ height: '70px', overflow: 'hidden' }}>
+  //                   <p className="text-gray-400">{nft.description}</p>
+  //                 </div>
+  //               </div>
+  //               <div className="p-4 bg-black">
+  //                 <p className="text-2xl font-bold text-white">{Web3.utils.fromWei(nft.price, "ether")} ETH</p>
+  //                 <button className="mt-4 w-full bg-teal-400 text-white font-bold py-2 px-12 rounded" onClick={() => buyNft(nft)}>Buy</button>
+  //               </div>
+  //             </div>
+  //           ))
+  //         }
+  //       </div>
+  //     </div>
+  //   </div>
+  // )
   // }
   const api = create("https://ipfs.infura.io:5001/api/v0")
   const [artist, setArtist] = useState("NA")
   const [song, setSong] = useState("NA")
   const [date, setDate] = useState("No Des")
+  const [allsong, setallSong] = useState([]);
+  const [file, setFile] = useState()
+  const [fileHash, setfileHash] = useState("");
+  const [toggle, setToggle] = useState(false)
   const router = useRouter()
   const web3 = router.query;
   console.log(web3)
@@ -116,12 +120,14 @@ export default function Home() {
   //   // console.log(contr);
   // }, []);
 
-  const CreateSong = async (e) => {
-    setFile(e.target.files[0]);
+  const CreateSong = async () => {
     console.log(artist);
     console.log(song);
     console.log(date);
 
+    await setallSong(preArray => [...preArray, { artist: artist, songName: song, date: date, file: file.name, hash: fileHash }])
+    // await localStorage.setItem("mySong", JSON.stringify(ls))
+    console.log(allsong)
     // Contract call:
 
   };
@@ -129,13 +135,25 @@ export default function Home() {
 
   const changeFile = async (e) => {
     const fil = e.target.files[0];
-    api.add(fil)
-    .then(get => {
-      console.log(`https://ipfs.infura.io/ipfs/${get.path}`)
-    })
-    .catch(er => {
-      console.log(er)
-    });
+    setFile(fil)
+    if (fil !== "undefined") {
+      console.log(fil.type)
+      if (fil.type === "audio/mpeg") {
+        api.add(fil)
+          .then(get => {
+            console.log(get)
+            console.log(`https://ipfs.io/ipfs/${get.path}`)
+            setfileHash(get.path)
+            setToggle(!toggle)
+          })
+          .catch(er => {
+            console.log(er)
+            alert("Upload Failed")
+          });
+      } else {
+        alert("Needs to be a mp3 file")
+      }
+    }
 
 
   }
@@ -143,24 +161,54 @@ export default function Home() {
 
   return (
     <>
-            <h1>Ownership Agreement</h1>
-            <div className="main">
-            <div className="create-song">
-              <div style={{"marginTop": "5px"}}>
-              <h5>Artist:<input required placeholder="Artist" onChange={(e) => setArtist(e.target.value)}></input></h5>
-              </div>
-              <div style={{"marginTop": "2px"}}>
-              <h5>Song Tittle:<input required placeholder="Song Tittle" onChange={(e) => setSong(e.target.value)}></input>  </h5>
-              </div>
-              <div style={{"marginTop": "2px"}}>
-              <h5>Date:<input required type="date" placeholder="" onChange={(e) => setDate(e.target.value)}></input>  </h5>
-              </div>
-              <div style={{"marginTop": "2px"}}>
-                <input required type="file" onChange={changeFile}></input>
-              </div>
-              <button style={{"marginTop": "2px"}} variant="success">Create</button>
+      <h1>Ownership Agreement</h1>
+      <div className="main">
+        <div className="create-song">
+          <div style={{ "marginTop": "5px" }}>
+            <h5>Artist:<input required placeholder="Artist" onChange={(e) => setArtist(e.target.value)}></input></h5>
+          </div>
+          <div style={{ "marginTop": "2px" }}>
+            <h5>Song Tittle:<input required placeholder="Song Tittle" onChange={(e) => setSong(e.target.value)}></input>  </h5>
+          </div>
+          <div style={{ "marginTop": "2px" }}>
+            <h5>Date:<input required type="date" placeholder="" onChange={(e) => setDate(e.target.value)}></input>  </h5>
+          </div>
+          <div style={{ "marginTop": "2px" }}>
+            <input required type="file" onChange={changeFile}></input>
+          </div>
+          {toggle && <button style={{ "marginTop": "2px" }} variant="success" onClick={CreateSong}>Create</button>}
+
+        </div>
+      </div>
+
+      {allsong.length > 0 ?
+
+        (
+
+          (<div>
+            <h2>My Uploaded Songs</h2>
+
+            <div className='display-flex'>
+              {
+                allsong.map((i, key) => {
+                  return (
+                    <div key={key} className="show-song">
+                      <p>artist: {i.artist}</p>
+                      <h5>Song Name: {i.songName}</h5>
+                      <h5>Date: {i.date}</h5>
+                      <h5>File Uploaded: {i.file}</h5>
+                      <p style={{ "margin": "2px", "wordWrap": "break-word" }}>File Hash: {i.hash}</p>
+                    </div>
+                  );
+                })
+              }
             </div>
-            </div>
-            </>
+          </div>)
+        ) :
+
+        (<div></div>)
+
+      }
+    </>
   );
 }
