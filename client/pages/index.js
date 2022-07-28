@@ -15,7 +15,6 @@ export default function Home() {
   const web3 = router.query;
   console.log(web3)
 
-
   const CreateSong = async () => {
     console.log(artist);
     console.log(song);
@@ -27,7 +26,6 @@ export default function Home() {
     // Contract call:
 
   };
-
 
   const changeFile = async (e) => {
     const fil = e.target.files[0];
@@ -50,9 +48,9 @@ export default function Home() {
         alert("Needs to be a mp3 file")
       }
     }
-
-
   }
+
+
 
 
   return (

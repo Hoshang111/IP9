@@ -9,7 +9,7 @@ contract AudioContract is ERC721URIStorage {
   using Counters for Counters.Counter;
   Counters.Counter private _tokenIds;
   address newAudioContract;
-  event NFTMinted(uint256);
+  event AudioMinted(uint256);
 
   constructor(address _newAudioContract) ERC721("Audio Contract", "AC") {
     newAudioContract = _newAudioContract;
@@ -24,6 +24,6 @@ contract AudioContract is ERC721URIStorage {
     _setTokenURI(newTokenId, _tokenURI);
 
     setApprovalForAll(newAudioContract, true);
-    emit NFTMinted(newTokenId);
+    emit AudioMinted(newTokenId);
   }
 }
