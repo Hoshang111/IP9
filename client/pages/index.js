@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { create } from 'ipfs-http-client'
 import Web3 from 'web3'
 import AudioContract from '../contracts/audioContract.json';
@@ -28,14 +28,12 @@ export default function Home() {
     const audioContract = new web3.eth.Contract(AudioContract.abi, "0xB26DF19DD0F64a34c905bea8F0C8022955d2b5a7")
     const accounts = await web3.eth.getAccounts()
     const marketPlaceContract = new web3.eth.Contract(Marketplace.abi, "0x686C2fE9D3706CBC0BCf2830fF53319D62F39be4")
-    let listingFee = await marketPlaceContract.methods.getListingFee().call()
-    listingFee = listingFee.toString()
+    let listingFee = await (marketPlaceContract.methods.getListingFee().call()).toString()
     audioContract.methods.mint(url).send({ from: accounts[0] }).on('receipt', function(receipt) {
         console.log('runing')
         let i = 0
-        const tokenId = receipt.events.AudioMinted.returnValues[0];
         i += 1
-        marketPlaceContract.methods.addAudio(AudioContractAddress, tokenId, Web3.utils.toWei(formInput.price, "ether"))
+        marketPlaceContract.methods.addAudio(AudioContractAddress, receipt.events.AudioMinted.returnValues[0], Web3.utils.toWei(formInput.price, "ether"))
             .send({ from: accounts[0], value: listingFee }).on('receipt', function () {console.log('Uploaded')})
         setID(i)
         })
@@ -76,14 +74,13 @@ export default function Home() {
     const audioContract = new web3.eth.Contract(AudioContract.abi, "0xB26DF19DD0F64a34c905bea8F0C8022955d2b5a7")
     const accounts = await web3.eth.getAccounts()
     const marketPlaceContract = new web3.eth.Contract(Marketplace.abi, "0x686C2fE9D3706CBC0BCf2830fF53319D62F39be4")
-    let listingFee = await marketPlaceContract.methods.getListingFee().call()
-    listingFee = listingFee.toString()
+    let listingFee = await (marketPlaceContract.methods.getListingFee().call()).toString()
     audioContract.methods.mint(url).send({ from: accounts[0] }).on('receipt', function (receipt) {
-        const tokenId = receipt.events.AudioMinted.returnValues[0];
-        marketPlaceContract.methods.listAudio(AudioContractAddress, tokenId, Web3.utils.toWei(formInput.price, "ether"))
-            .send({ from: accounts[0], value: listingFee }).on('receipt', function () {
-                console.log('Listed')
-            })
+      let i = 0
+        i += 1
+        marketPlaceContract.methods.listAudio(AudioContractAddress, receipt.events.AudioMinted.returnValues[0], Web3.utils.toWei(formInput.price, "ether"))
+            .send({ from: accounts[0], value: listingFee }).on('receipt', function () {console.log('Listed')})
+            setID(i)
         })
   }
 
