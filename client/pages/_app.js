@@ -28,7 +28,6 @@ function MyApp({ Component, pageProps }) {
     console.log(a[0])
   }
 
-
   return (
     <div>
       <div className="navbar">
