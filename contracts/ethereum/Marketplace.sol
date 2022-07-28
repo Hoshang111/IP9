@@ -44,6 +44,11 @@ contract Marketplace is ReentrancyGuard {
     uint256 tokenId,
     uint256 offerPrice
   );
+  event offerAccepted(
+    address offerer,
+    uint256 tokenId,
+    uint256 offerPrice
+  );
   event AudioSold(
     address AudioContract,
     uint256 tokenId,
@@ -91,23 +96,17 @@ contract Marketplace is ReentrancyGuard {
         false
     );
     totalOffers++;
+    emit offerMade(msg.sender, _tokenId, _offerPrice);
   }
 
 // ########################################################################
 
   function acceptOffer(uint256 offerId, uint256 _tokenId) public nonReentrant {
-    
     Audio storage acceptedAudio = _idToAudio[_tokenId];
     Offers storage _offer = _AudioOffers[offerId];
     require(msg.sender == acceptedAudio.owner && msg.sender != _offer.offerer);
-
-    // Signature
-    // require(_offer.signatures[0] == _offer.offerer);
-    // _offer.signatures.push(msg.sender);
-    // require(_offer.signatures[1] == msg.sender);
-    // require(_offer.signatures.length == 2);
-
     _offer.accepted = true;
+    emit offerAccepted(_AudioOffers[offerId].offerer, _tokenId, _AudioOffers[offerId].offerPrice);
   }
 
 // ########################################################################
@@ -126,25 +125,24 @@ contract Marketplace is ReentrancyGuard {
     emit AudioSold(_audioContract, audio.tokenId, buyer, msg.value);
   }
 
+// ########################################################################
+// Helper Functions 
+
   function getListingFee() public view returns (uint256) {
     return LISTING_FEE;
   }
 
-  // ########################################################################
-
-    function getListedOffers(uint256 _tokenId) public view returns (Offers[] memory) {
-        Offers[] memory offers = new Offers[](totalOffers);
-        uint j = 0;
-        for (uint i = 0; i < totalOffers; i++) {
-            if (_AudioOffers[i].tokenId == _tokenId) {
-                offers[j] = _AudioOffers[i];
-                j++;
-             }
-        }
-        return offers;
+  function getListedOffers(uint256 _tokenId) public view returns (Offers[] memory) {
+    Offers[] memory offers = new Offers[](totalOffers);
+    uint j = 0;
+    for (uint i = 0; i < totalOffers; i++) {
+        if (_AudioOffers[i].tokenId == _tokenId) {
+            offers[j] = _AudioOffers[i];
+            j++;
+          }
     }
-
-// ########################################################################
+    return offers;
+  }
 
   function getListedAudio() public view returns (Audio[] memory) {
     uint256 audioCount = _ContractCount;
@@ -160,8 +158,6 @@ contract Marketplace is ReentrancyGuard {
     }
     return audio;
   }
-
-// ########################################################################
 
   function getMyAudio() public view returns (Audio[] memory) {
     uint audioCount = _ContractCount;
@@ -182,8 +178,6 @@ contract Marketplace is ReentrancyGuard {
     }
     return audio;
   }
-
-// ########################################################################
 
   function getMyListedAudio() public view returns (Audio[] memory) {
     uint audioCount = _ContractCount;
