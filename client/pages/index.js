@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/router'
 import { create } from 'ipfs-http-client'
+import Web3 from 'web3'
+import AudioContract from '../contracts/audioContract.json';
+import Marketplace from '../contracts/Marketplace.json';
 
 export default function Home() {
   const api = create("https://ipfs.infura.io:5001/api/v0")
@@ -11,20 +13,36 @@ export default function Home() {
   const [file, setFile] = useState()
   const [fileHash, setfileHash] = useState("");
   const [toggle, setToggle] = useState(false)
-  const router = useRouter()
-  const web3 = router.query;
-  console.log(web3)
+  const [ida, setID] = useState(0)
+  // const web3 = router.query;
+  // console.log(web3)
 
   const CreateSong = async () => {
     console.log(artist);
     console.log(song);
     console.log(date);
+    // Contract call:
+    const web3 = new Web3(window.ethereum)
+    const url = `https://ipfs.io/ipfs/${fileHash}`
 
-    await setallSong(preArray => [...preArray, { artist: artist, songName: song, date: date, file: file.name, hash: fileHash }])
+    const audioContract = new web3.eth.Contract(AudioContract.abi, "0xB26DF19DD0F64a34c905bea8F0C8022955d2b5a7")
+    const accounts = await web3.eth.getAccounts()
+    const marketPlaceContract = new web3.eth.Contract(Marketplace.abi, "0x686C2fE9D3706CBC0BCf2830fF53319D62F39be4")
+    let listingFee = await marketPlaceContract.methods.getListingFee().call()
+    listingFee = listingFee.toString()
+    audioContract.methods.mint(url).send({ from: accounts[0] }).on('receipt', function(receipt) {
+        console.log('runing')
+        let i = 0
+        const tokenId = receipt.events.AudioMinted.returnValues[0];
+        i += 1
+        marketPlaceContract.methods.addAudio(AudioContractAddress, tokenId, Web3.utils.toWei(formInput.price, "ether"))
+            .send({ from: accounts[0], value: listingFee }).on('receipt', function () {console.log('Uploaded')})
+        setID(i)
+        })
+
+  await setallSong(preArray => [...preArray, { artist: artist, songName: song, date: date, file: file.name, hash: fileHash }])
     // await localStorage.setItem("mySong", JSON.stringify(ls))
     console.log(allsong)
-    // Contract call:
-
   };
 
   const changeFile = async (e) => {
@@ -50,6 +68,24 @@ export default function Home() {
     }
   }
 
+  const listTheSong = async () => {
+    console.log("show songs")
+    const web3 = new Web3(window.ethereum)
+    const url = `https://ipfs.io/ipfs/${fileHash}`
+
+    const audioContract = new web3.eth.Contract(AudioContract.abi, "0xB26DF19DD0F64a34c905bea8F0C8022955d2b5a7")
+    const accounts = await web3.eth.getAccounts()
+    const marketPlaceContract = new web3.eth.Contract(Marketplace.abi, "0x686C2fE9D3706CBC0BCf2830fF53319D62F39be4")
+    let listingFee = await marketPlaceContract.methods.getListingFee().call()
+    listingFee = listingFee.toString()
+    audioContract.methods.mint(url).send({ from: accounts[0] }).on('receipt', function (receipt) {
+        const tokenId = receipt.events.AudioMinted.returnValues[0];
+        marketPlaceContract.methods.listAudio(AudioContractAddress, tokenId, Web3.utils.toWei(formInput.price, "ether"))
+            .send({ from: accounts[0], value: listingFee }).on('receipt', function () {
+                console.log('Listed')
+            })
+        })
+  }
 
 
 
@@ -97,6 +133,7 @@ export default function Home() {
                 })
               }
             </div>
+            <button onClick={listTheSong}>Show All The Song For Listing</button>
           </div>)
         ) :
 
