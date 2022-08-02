@@ -14,6 +14,9 @@ export default function Home() {
   const [fileHash, setfileHash] = useState("");
   const [toggle, setToggle] = useState(false)
   const [ida, setID] = useState(0)
+  const [audioContract, setaudioContract] = useState()
+  const [accounts, setAccounts] = useState()
+  const [LFee,setLFee] = useState()
   // const web3 = router.query;
   // console.log(web3)
 
@@ -72,16 +75,24 @@ export default function Home() {
     const url = `https://ipfs.io/ipfs/${fileHash}`
 
     const audioContract = new web3.eth.Contract(AudioContract.abi, "0xB26DF19DD0F64a34c905bea8F0C8022955d2b5a7")
+    setaudioContract(audioContract)
     const accounts = await web3.eth.getAccounts()
+    setAccounts(accounts)
     const marketPlaceContract = new web3.eth.Contract(Marketplace.abi, "0x686C2fE9D3706CBC0BCf2830fF53319D62F39be4")
-    let listingFee = await (marketPlaceContract.methods.getListingFee().call()).toString()
-    audioContract.methods.mint(url).send({ from: accounts[0] }).on('receipt', function (receipt) {
-      let i = 0
-        i += 1
-        marketPlaceContract.methods.listAudio(AudioContractAddress, receipt.events.AudioMinted.returnValues[0], Web3.utils.toWei(formInput.price, "ether"))
-            .send({ from: accounts[0], value: listingFee }).on('receipt', function () {console.log('Listed')})
-            setID(i)
-        })
+    let lFee = await (marketPlaceContract.methods.getListingFee().call()).toString()
+    setLFee(lFee)
+    call_me()
+    console.log(ida)
+  }
+
+  const call_me = async () => {
+  audioContract.methods.mint(url).send({ from: accounts[0] }).on('receipt', (receipt) => {
+    let i = 0
+      i += 1
+      marketPlaceContract.methods.listAudio(AudioContractAddress, receipt.events.AudioMinted.returnValues[0], Web3.utils.toWei(formInput.price, "ether"))
+          .send({ from: accounts[0], value: LFee }).on('receipt', () => {console.log('Listed')})
+          setID(i)
+      })
   }
 
 
